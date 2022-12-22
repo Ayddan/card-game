@@ -58,6 +58,15 @@ function App() {
 
   const newCardHold = (cardPos,holderPos) => {
     setCardHoldData({
+      from: 'user-hand',
+      holderPos: holderPos,
+      cardPos: cardPos
+    })
+  }
+
+  const newJokerHold = (cardPos,holderPos) => {
+    setCardHoldData({
+      from: 'joker-hand',
       holderPos: holderPos,
       cardPos: cardPos
     })
@@ -80,16 +89,26 @@ function App() {
     let droppedCardInfo = userCards[cardHoldData.holderPos][cardHoldData.cardPos].split('-')
     let isCardInf = (parseInt(droppedHolderFirstCardInfos[0]) - 1 === parseInt(droppedCardInfo[0]))
     let isCardSup = (parseInt(droppedHolderFirstCardInfos[0]) + 1 === parseInt(droppedCardInfo[0]))
-    let isCardJoker = droppedCardInfo[0] === 'joker' || droppedHolderFirstCardInfos[0] === 'joker'
-    console.log(isCardJoker)
+    let isDroppedCardJoker = cardHoldData.from === 'joker-hand'
+    let isHolderCardJoker = droppedHolderFirstCardInfos[0] === 'joker'
+    console.log(isDroppedCardJoker)
     console.log(droppedCardInfo + ' ' + droppedHolderFirstCardInfos)
-    if(cardHoldData != undefined && (isCardInf || isCardSup || isCardJoker)){
-      let newUserCards = userCards
-      let newMiddleCards = middleCards
-      newMiddleCards[droppedHolderPos].push(userCards[cardHoldData.holderPos][cardHoldData.cardPos])
-      newUserCards[cardHoldData.holderPos].splice(cardHoldData.cardPos, 1)
-      setUserCards([...newUserCards])
-      setMiddleCards([...newMiddleCards])
+    if(cardHoldData != undefined && (isCardInf || isCardSup || isDroppedCardJoker || isHolderCardJoker)){
+      if(isDroppedCardJoker){
+        let newJockersCards = jockersCards
+        let newMiddleCards = middleCards
+        newMiddleCards[droppedHolderPos].push(jockersCards[cardHoldData.cardPos])
+        newJockersCards.splice(cardHoldData.cardPos, 1)
+        setJockersCards([...newJockersCards])
+        setMiddleCards([...newMiddleCards])
+      }else{
+        let newUserCards = userCards
+        let newMiddleCards = middleCards
+        newMiddleCards[droppedHolderPos].push(userCards[cardHoldData.holderPos][cardHoldData.cardPos])
+        newUserCards[cardHoldData.holderPos].splice(cardHoldData.cardPos, 1)
+        setUserCards([...newUserCards])
+        setMiddleCards([...newMiddleCards])
+      }
     }
   }
 
@@ -209,7 +228,7 @@ function App() {
                 cards={jockersCards}
                 canHold={true}
                 cardHoldData={cardHoldData}
-                cardHold={(cardPos,holderPos)=>newCardHold(cardPos,holderPos)}
+                cardHold={(cardPos,holderPos)=>newJokerHold(cardPos,holderPos)}
                 cardDrop={(holderPos)=>newJokerCardDrop (holderPos)}
                 />
             </div>
