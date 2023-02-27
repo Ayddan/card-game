@@ -19,6 +19,10 @@ function App() {
     ['back','back','back'],
     ['back','back','back','back']
   ])
+  const [userBank, setuserBank] = useState([
+    'back','back','back','back','back','back',
+    'back','back','back','back','back','back',
+  ])
   const [sideCards, setSideCards] = useState([
     ['back','back','back','back','back'],
     ['back','back','back','back','back']
@@ -56,6 +60,23 @@ function App() {
     setUserCards([...newUserCards])
   }
 
+  const userBankCardDiscovered = () => {
+    let emptyUserSlot = null
+    let cardsBackCount = 0
+    for(let s of userCards){
+      if(s.length === 0) emptyUserSlot = userCards.indexOf(s)
+      if(s.includes('back')) cardsBackCount++
+    }
+    if(emptyUserSlot != null && cardsBackCount === 0){
+      let index = Math.floor(Math.random()*deck.length)
+      let card = deck[index]
+      deck.splice(index, 1)
+      let newUserCards = userCards
+      newUserCards[emptyUserSlot][0] = card
+      setUserCards([...newUserCards])
+    }
+  }
+
   const newCardHold = (cardPos,holderPos) => {
     setCardHoldData({
       from: 'user-hand',
@@ -89,11 +110,12 @@ function App() {
     let droppedCardInfo = userCards[cardHoldData.holderPos][cardHoldData.cardPos].split('-')
     let isCardInf = (parseInt(droppedHolderFirstCardInfos[0]) - 1 === parseInt(droppedCardInfo[0]))
     let isCardSup = (parseInt(droppedHolderFirstCardInfos[0]) + 1 === parseInt(droppedCardInfo[0]))
+    let isCycleCase = parseInt(droppedHolderFirstCardInfos[0]) + parseInt(droppedCardInfo[0]) === 14 || parseInt(droppedHolderFirstCardInfos[0]) - parseInt(droppedCardInfo[0]) === -12
     let isDroppedCardJoker = cardHoldData.from === 'joker-hand'
     let isHolderCardJoker = droppedHolderFirstCardInfos[0] === 'joker'
     console.log(isDroppedCardJoker)
     console.log(droppedCardInfo + ' ' + droppedHolderFirstCardInfos)
-    if(cardHoldData != undefined && (isCardInf || isCardSup || isDroppedCardJoker || isHolderCardJoker)){
+    if(cardHoldData != undefined && (isCardInf || isCardSup || isCycleCase || isDroppedCardJoker || isHolderCardJoker)){
       if(isDroppedCardJoker){
         let newJockersCards = jockersCards
         let newMiddleCards = middleCards
@@ -207,6 +229,19 @@ function App() {
             </div>
           </div>
           <div className='user-hand'>
+            <div className='user-bank'>
+              <CardHolder
+                holderPos={0}
+                stackGap={5}
+                maxCount={userBank.length}
+                cards={userBank}
+                canHold={true}
+                cardHoldData={cardHoldData}
+                cardDiscovered={(holderPos)=>userBankCardDiscovered()}
+                cardHold={(cardPos,holderPos)=>newCardHold(cardPos,holderPos)}
+                cardDrop={(holderPos)=>console.log(holderPos)}
+                />
+            </div>
             {userCards.map((c,i)=>(
               <CardHolder key={i} 
                 holderPos={i} 
